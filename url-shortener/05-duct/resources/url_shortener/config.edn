@@ -3,11 +3,14 @@
  ;; Integrant Config
  {:duct.core/project-ns url-shortener
 
-  :url-shortener.web/handler
+  :url-shortener.core/shortener
   {:db #ig/ref :duct.database.sql/hikaricp}
+  
+  :url-shortener.adapters.rest-api/handler
+  {:shortener #ig/ref :url-shortener.core/shortener}
 
   :url-shortener.web/server
-  {:handler #ig/ref :url-shortener.web/handler
+  {:handler #ig/ref :url-shortener.adapters.rest-api/handler
    :env #ig/ref :duct.core/environment}
 
   :duct.migrator/ragtime

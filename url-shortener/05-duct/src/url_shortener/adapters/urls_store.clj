@@ -1,33 +1,18 @@
-(ns url-shortener.boundary.urls-store
+(ns url-shortener.adapters.urls-store
   (:require [duct.database.sql]
             [honey.sql :as sql]
             [next.jdbc.sql :as jdbc.sql]
-            [next.jdbc.result-set :refer [as-unqualified-lower-maps]])
+            [next.jdbc.result-set :refer [as-unqualified-lower-maps]]
+            [url-shortener.ports.url-db :refer [UrlsDB]])
   (:import [org.h2.jdbc JdbcSQLIntegrityConstraintViolationException]))
-
-
-(defprotocol URLs
-  (list-all         [this])
-  (find-by-id       [this id])
-  (save             [this id url])
-  (next-counter-val [this]))
-
 
 (def ^:private all-urls-sql
   (sql/format {:select [:id :url]
                :from :urls}))
 
-(def ^:private next-val-sql
-  ["select nextval('counter')"])
-
-(extend-protocol URLs
+(extend-protocol UrlsDB
   duct.database.sql.Boundary
-  
-  (next-counter-val [{db :spec}]
-    (-> (jdbc.sql/query db next-val-sql)
-        (first)
-        :nextval))
-  
+
   (list-all [{db :spec}]
     (jdbc.sql/query db all-urls-sql {:builder-fn as-unqualified-lower-maps}))
   

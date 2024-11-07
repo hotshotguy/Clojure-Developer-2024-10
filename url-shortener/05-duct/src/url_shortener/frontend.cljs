@@ -43,7 +43,7 @@
         [:button.block.accent
          {:on-click (fn [_e]
                       (when (seq @*input-value)
-                        (go (let [response (<! (http/post "/" {:json-params {:url @*input-value}}))]
+                        (go (let [response (<! (http/post "/urls" {:json-params {:url @*input-value}}))]
                               (if (:success response)
                                 (let [id        (-> response :body :id)
                                       host      (.. js/window -location -href)

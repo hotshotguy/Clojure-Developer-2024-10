@@ -1,6 +1,8 @@
 (ns url-shortener.main
   (:gen-class)
   (:require [duct.core :as duct]
+            [url-shortener.adapters.urls-store]
+            [url-shortener.adapters.counter]
             [url-shortener.web]))
 
 (duct/load-hierarchy)

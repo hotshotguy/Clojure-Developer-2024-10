@@ -2,11 +2,9 @@
   (:refer-clojure :exclude [test])
   (:require [clojure.repl :refer :all]
             [fipp.edn :refer [pprint]]
-            [clojure.tools.namespace.repl :refer [refresh-all]]
+            [clojure.tools.namespace.repl :as c.t.n]
             [clojure.java.io :as io]
             [duct.core :as duct]
-            [duct.core.repl :as duct-repl :refer [auto-reset]]
-            [integrant.core :as ig]
             [integrant.repl :refer [clear halt go init prep reset]]
             [integrant.repl.state :refer [config system]]))
 
@@ -26,14 +24,21 @@
 (integrant.repl/set-prep! #(duct/prep-config (read-config) profiles))
 
 (comment
-  (refresh-all)
+  (c.t.n/clear)
+  (c.t.n/refresh-all)
 
   config   ; to check eventual config
   system   ; to check current system
-
+  
   ;; system's lifecycle
   (go)     ; prep and init — start the system
   (reset)  ; halt the system, refresh all changed code (with tools.namespace), start the system again
   (halt)   ; stop the system
-  )
+  
+  (System/exit 0)) ; exit!
 
+(comment
+  (let [handler (:url-shortener.adapters.rest-api/handler system)]
+    #_(handler {:uri "/urls" :request-method :post :params {:url "https://clojure.org"}})
+    #_(handler {:uri "/urls/clj" :request-method :get})
+    (handler {:uri "/urls" :request-method :get})))

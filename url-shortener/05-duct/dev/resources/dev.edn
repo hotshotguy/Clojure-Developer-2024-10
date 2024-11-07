@@ -2,7 +2,7 @@
  ; https://www.h2database.com/html/features.html#compatibility
  {:connection-uri "jdbc:h2:./database;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH"}
  
- :url-shortener.web/handler
+ :url-shortener.adapters.rest-api/handler
  {:host "http://localhost:8000/"}
  
  :url-shortener.web/server
