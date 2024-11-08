@@ -59,7 +59,7 @@ Server stopped!
 4. Запускаем сервер `lein run`.
 
 ## Ссылки
-
+- [Ports and Adapters architecture](https://herbertograca.com/2017/09/14/ports-adapters-architecture/)
 - [Duct framework](https://github.com/duct-framework/duct)
   - [Duct core](https://github.com/duct-framework/core)
   - [Duct module.sql](https://github.com/duct-framework/module.sql/)
