@@ -12,7 +12,7 @@
       (empty? test-vec) true
       (== (count test-vec) 1) true
       (not go-next) false
-      :else (recur-palindrom (subvec test-vec 1 (dec (count test-vec)))))))
+      :else (recur (subvec test-vec 1 (dec (count test-vec)))))))
 
 (defn is-palindrome [test-string]
   (let [s (transform-string test-string)
