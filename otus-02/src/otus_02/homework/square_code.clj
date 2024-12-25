@@ -1,4 +1,7 @@
-(ns otus-02.homework.square-code)
+(ns otus-02.homework.square-code
+  (:require [clojure.string :as string])
+  (:require [clojure.math :as math])
+  (:require [otus-02.homework.palindrome :as pal]))
 
 ;; Реализовать классический метод составления секретных сообщений, называемый `square code`.
 ;; Выведите закодированную версию полученного текста.
@@ -49,8 +52,42 @@
 "sseoau "
 
 
+(defn trainling-spaces [s trailing-count]
+  (if (> (count s) trailing-count)
+    s
+    (str s (apply str (repeat (- trailing-count (count s)) " ")))))
 
-(defn encode-string [input])
+(defn split-for-encode [col initial s]
+    (cond
+      (empty? s) initial
+      (<= (count s) col) (conj initial (trainling-spaces s col))
+      :else (recur col (conj initial (subs s 0 col)) (subs s col))))
 
+(defn transpose-string-v [v]
+  (->> (map vec v)
+       (apply mapv vector)
+       (map #(apply str %))))
+
+(defn encode-string [input]
+  (let [s (pal/transform-string input)
+        col (-> s
+                (count)
+                (math/sqrt)
+                (math/ceil)
+                (int)
+                )]
+    (->> input
+         (pal/transform-string)
+         (split-for-encode col [])
+         (transpose-string-v)
+         (string/join " "))))
 
 (defn decode-string [input])
+
+(comment
+  (def s "If man was meant to stay on the ground, god would have given us roots.")
+  (encode-string s)
+  (apply str (repeat 0 " "))
+  (trainling-spaces "some" 8)
+  (math/sqrt (count s))
+  )
