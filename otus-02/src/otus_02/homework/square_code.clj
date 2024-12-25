@@ -68,26 +68,32 @@
        (apply mapv vector)
        (map #(apply str %))))
 
+(defn get-square-length [s]
+  (-> s
+      (count)
+      (math/sqrt)
+      (math/ceil)
+      (int)))
+
+(defn code-s [col s]
+  (->> s
+       (split-for-encode col [])
+       (transpose-string-v)))
+
 (defn encode-string [input]
   (let [s (pal/transform-string input)
-        col (-> s
-                (count)
-                (math/sqrt)
-                (math/ceil)
-                (int)
-                )]
-    (->> input
-         (pal/transform-string)
-         (split-for-encode col [])
-         (transpose-string-v)
+        col (get-square-length s)]
+    (->> s
+         (code-s col)
          (string/join " "))))
 
-(defn decode-string [input])
+(defn decode-string [input]
+  (let [col (get-square-length input)]
+    (->> input
+         (code-s col)
+         (string/join)
+         (string/trim))))
 
 (comment
   (def s "If man was meant to stay on the ground, god would have given us roots.")
-  (encode-string s)
-  (apply str (repeat 0 " "))
-  (trainling-spaces "some" 8)
-  (math/sqrt (count s))
-  )
+  (decode-string (encode-string s)))
