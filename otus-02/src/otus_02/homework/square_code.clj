@@ -52,10 +52,8 @@
 "sseoau "
 
 
-(defn trainling-spaces [s trailing-count]
-  (if (> (count s) trailing-count)
-    s
-    (str s (apply str (repeat (- trailing-count (count s)) " ")))))
+(defn trainling-spaces [s col]
+  (format (str "%-" col "s") s))
 
 (defn split-for-encode [col initial s]
     (cond
@@ -96,4 +94,6 @@
 
 (comment
   (def s "If man was meant to stay on the ground, god would have given us roots.")
-  (decode-string (encode-string s)))
+  (decode-string (encode-string s))
+  (trainling-spaces "some" 8)
+  (math/sqrt (count s)))
