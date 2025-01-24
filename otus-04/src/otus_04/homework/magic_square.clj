@@ -21,19 +21,15 @@
      (dec n)
       new-i)))
 
-(defn update-square [s i j value]
-  [(update-in s [i] assoc j value) i j])
-
 (defn next-square [square i j value]
   (let [n (count square)
         next-i (dec-index n i)
         next-j (inc-index n j)
         up-i (inc-index n i)]
     (cond
-      (zero? (get-in square [next-i next-j])) (update-square square next-i next-j value)
-      (zero? (get-in square [up-i j])) (update-square square up-i j value)
+      (zero? (get-in square [next-i next-j])) [(assoc-in square [next-i next-j] value) next-i next-j]
+      (zero? (get-in square [up-i j])) [(assoc-in square [up-i j] value) up-i j]
       :else [])))
-
 
 (defn magic-square
   "Функция возвращает вектор векторов целых чисел,
@@ -44,9 +40,8 @@
   горизонталей и диагоналей длиной в n должны быть одинаковы."
   [n]
   {:pre [(odd? n)]}
-  (let [init (create-empty-square n)
-        init-s (assoc init 0 (assoc (init 0) (quot n 2) 1))]
-    (loop [s init-s
+  (let [init (assoc-in  (create-empty-square n) [0 (quot n 2)] 1)]
+    (loop [s init
            i 0
            j (quot n 2)
            value 2]
