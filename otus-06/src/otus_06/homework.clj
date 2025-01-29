@@ -113,11 +113,10 @@
     (doseq [lines (line-seq rdr)]
       (println (fmt-fn lines)))))
 
-(defn- table-value [table-key id & rest-options]
+(defn- table-value [table-key id & [value-col id-col]]
   (with-open [rdr (io/reader (tables table-key))]
     (loop [lines (line-seq rdr)]
-      (let [line-vec (split-line (first lines))
-            [value-col id-col] rest-options]
+      (let [line-vec (split-line (first lines))]
         (cond (= (line-vec (or id-col 0)) id) (line-vec value-col)
               (empty? (rest lines)) nil
               :else (recur (rest lines)))))))
@@ -129,8 +128,27 @@
             (table-value :product product-id 1)
             count)))
 
+(defn- get-product-price [id]
+  (let [price-col 2]
+    (parse-double (table-value :product id price-col))))
+
 (defn- print-total-sales [customer-name]
-  )
+  (let [customer-id (table-value :customer customer-name 0 1)]
+    (with-open [rdr (io/reader (tables :sales))]
+      (loop [lines (line-seq rdr)
+             total-price 0.0]
+        (if (empty? lines)
+          (println (vector customer-name total-price))
+          (let [line (fmt-line (first lines))
+                line-customer-id (line 0)
+                product-id (line 1)
+                product-count (Integer/parseInt (line 2))
+                total-product-price (* (get-product-price product-id)
+                                       product-count)
+                rest-lines (rest lines)]
+            (recur rest-lines (if (= customer-id line-customer-id)
+                                (+ total-price total-product-price)
+                                total-price))))))))
 
 (defn- print-menu []
   (println "
@@ -148,11 +166,14 @@ Enter an option?
 
 (defn- make-action [input]
   (cond (= input "1") (do (print-table fmt-line :customer)
-                        true)
+                          true)
         (= input "2") (do (print-table fmt-line :product)
-                        true)
+                          true)
         (= input "3") (do (print-table fmt-sales-line :sales)
-                        true)
+                          true)
+        (= input "4") (do (println "Input customer name:")
+                          (print-total-sales (read-line))
+                          true)
         (= input "6") nil
         :else true))
 
@@ -164,10 +185,12 @@ Enter an option?
              (recur (read-line))))))
 
 (comment
-  (table-value :customer "2" 1)
   (table-value :product "3" 2)
+  (table-value :customer "Sue Jones" 0 1)
+  (table-value :customer "3" 1)
   (slurp "resources/homework/cust.txt")
   (with-out-str (print-table fmt-line :customer))
   (print-table fmt-line :sales)
+  (print-total-sales "Sue Jones")
   (-main)
   ())
