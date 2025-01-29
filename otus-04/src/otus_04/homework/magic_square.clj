@@ -10,16 +10,10 @@
   (vec (repeat n (vec (repeat n 0)))))
 
 (defn inc-index [n i]
-  (let [new-i (inc i)]
-    (if (> new-i (dec n))
-      0
-      new-i)))
+  (mod (inc i) n))
 
 (defn dec-index [n i]
-  (let [new-i (dec i)]
-    (if (< new-i 0)
-     (dec n)
-      new-i)))
+  (mod (dec i) n))
 
 (defn next-square [square i j value]
   (let [n (count square)
