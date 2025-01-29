@@ -1,4 +1,6 @@
-(ns otus-06.homework)
+(ns otus-06.homework
+  (:require [clojure.java.io :as io]
+            [clojure.string :as string]))
 
 ;; Загрузить данные из трех файлов на диске.
 ;; Эти данные сформируют вашу базу данных о продажах.
@@ -94,3 +96,78 @@
 
 
 ;; Файлы находятся в папке otus-06/resources/homework
+(def tables {:customer "resources/homework/cust.txt"
+             :product "resources/homework/prod.txt"
+             :sales "resources/homework/sales.txt"})
+
+(defn- split-line [line]
+  (string/split line #"\|"))
+
+(defn- fmt-line [line]
+  (-> (split-line line)
+      rest
+      vec))
+
+(defn- print-table [fmt-fn name]
+  (with-open [rdr (io/reader (tables name))]
+    (doseq [lines (line-seq rdr)]
+      (println (fmt-fn lines)))))
+
+(defn- table-value [table-key id & rest-options]
+  (with-open [rdr (io/reader (tables table-key))]
+    (loop [lines (line-seq rdr)]
+      (let [line-vec (split-line (first lines))
+            [value-col id-col] rest-options]
+        (cond (= (line-vec (or id-col 0)) id) (line-vec value-col)
+              (empty? (rest lines)) nil
+              :else (recur (rest lines)))))))
+
+(defn- fmt-sales-line [line]
+  (let [line-vec (fmt-line line)
+        [customer-id product-id count] line-vec]
+    (vector (table-value :customer customer-id 1)
+            (table-value :product product-id 1)
+            count)))
+
+(defn- print-total-sales [customer-name]
+  )
+
+(defn- print-menu []
+  (println "
+*** Sales Menu ***
+------------------
+1. Display Customer Table
+2. Display Product Table
+3. Display Sales Table
+4. Total Sales for Customer
+5. Total Count for Product
+6. Exit
+
+Enter an option?
+"))
+
+(defn- make-action [input]
+  (cond (= input "1") (do (print-table fmt-line :customer)
+                        true)
+        (= input "2") (do (print-table fmt-line :product)
+                        true)
+        (= input "3") (do (print-table fmt-sales-line :sales)
+                        true)
+        (= input "6") nil
+        :else true))
+
+(defn -main []
+  (print-menu)
+  (loop [num (read-line)]
+    (and (make-action num)
+         (do (print-menu)
+             (recur (read-line))))))
+
+(comment
+  (table-value :customer "2" 1)
+  (table-value :product "3" 2)
+  (slurp "resources/homework/cust.txt")
+  (with-out-str (print-table fmt-line :customer))
+  (print-table fmt-line :sales)
+  (-main)
+  ())
