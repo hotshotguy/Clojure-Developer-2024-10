@@ -96,10 +96,6 @@
 
 
 ;; Файлы находятся в папке otus-06/resources/homework
-(def tables {:customer "resources/homework/cust.txt"
-             :product "resources/homework/prod.txt"
-             :sales "resources/homework/sales.txt"})
-
 (defn- split-line [line]
   (string/split line #"\|"))
 
@@ -109,9 +105,12 @@
       vec))
 
 (defn- print-table [fmt-fn name]
-  (with-open [rdr (io/reader (tables name))]
-    (doseq [lines (line-seq rdr)]
-      (println (fmt-fn lines)))))
+  (let [tables {:customer "resources/homework/cust.txt"
+                :product "resources/homework/prod.txt"
+                :sales "resources/homework/sales.txt"}]
+    (with-open [rdr (io/reader (tables name))]
+      (doseq [lines (line-seq rdr)]
+        (println (fmt-fn lines))))))
 
 (defn- table-value [table-key id & [value-col id-col]]
   (with-open [rdr (io/reader (tables table-key))]
@@ -132,23 +131,32 @@
   (let [price-col 2]
     (parse-double (table-value :product id price-col))))
 
-(defn- print-total-sales [customer-name]
-  (let [customer-id (table-value :customer customer-name 0 1)]
+(defn- get-total-product-price [[_ product-id product-count-str]]
+  (let [product-count (Integer/parseInt product-count-str)]
+    (* (get-product-price product-id)
+       product-count)))
+
+(defn- get-total-product-count [[_ _ product-count]]
+  (Integer/parseInt product-count))
+
+(defn- print-total [name table-key get-total-value]
+  (let [fomat-str {:customer "%s: %.2f"
+                   :product "%s: %d"}
+        sales-columns {:customer 0
+                       :product 1}
+        id (table-value table-key name 0 1)]
     (with-open [rdr (io/reader (tables :sales))]
       (loop [lines (line-seq rdr)
-             total-price 0.0]
+             total 0]
         (if (empty? lines)
-          (println (vector customer-name total-price))
+          (println (format (fomat-str table-key) name total))
           (let [line (fmt-line (first lines))
-                line-customer-id (line 0)
-                product-id (line 1)
-                product-count (Integer/parseInt (line 2))
-                total-product-price (* (get-product-price product-id)
-                                       product-count)
+                line-id (line (sales-columns table-key))
+                total-product (get-total-value line)
                 rest-lines (rest lines)]
-            (recur rest-lines (if (= customer-id line-customer-id)
-                                (+ total-price total-product-price)
-                                total-price))))))))
+            (recur rest-lines (if (= id line-id)
+                                (+ total total-product)
+                                total))))))))
 
 (defn- print-menu []
   (println "
@@ -172,7 +180,10 @@ Enter an option?
         (= input "3") (do (print-table fmt-sales-line :sales)
                           true)
         (= input "4") (do (println "Input customer name:")
-                          (print-total-sales (read-line))
+                          (print-total (read-line) :customer get-total-product-price)
+                          true)
+        (= input "5") (do (println "Input product name:")
+                          (print-total (read-line) :product get-total-product-count)
                           true)
         (= input "6") nil
         :else true))
@@ -188,9 +199,10 @@ Enter an option?
   (table-value :product "3" 2)
   (table-value :customer "Sue Jones" 0 1)
   (table-value :customer "3" 1)
-  (slurp "resources/homework/cust.txt")
-  (with-out-str (print-table fmt-line :customer))
+  (print-table fmt-line :product)
+  (print-table fmt-line :customer)
   (print-table fmt-line :sales)
-  (print-total-sales "Sue Jones")
+  (print-total "Sue Jones" :customer get-total-product-price)
+  (print-total "shoess" :product get-total-product-count)
   (-main)
   ())
