@@ -103,14 +103,13 @@
   (-> (split-line line)
       rest
       vec))
-
+(def ^:private tables {:customer "resources/homework/cust.txt"
+                       :product "resources/homework/prod.txt"
+                       :sales "resources/homework/sales.txt"})
 (defn- print-table [fmt-fn name]
-  (let [tables {:customer "resources/homework/cust.txt"
-                :product "resources/homework/prod.txt"
-                :sales "resources/homework/sales.txt"}]
-    (with-open [rdr (io/reader (tables name))]
-      (doseq [lines (line-seq rdr)]
-        (println (fmt-fn lines))))))
+  (with-open [rdr (io/reader (tables name))]
+     (doseq [lines (line-seq rdr)]
+       (println (fmt-fn lines)))))
 
 (defn- table-value [table-key id & [value-col id-col]]
   (with-open [rdr (io/reader (tables table-key))]
